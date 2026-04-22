@@ -125,7 +125,20 @@ public sealed class SettingsForm : Form
 
         _transcriptFormatCombo.Items.Clear();
         _transcriptFormatCombo.Items.Add("txt+jsonl");
-        _transcriptFormatCombo.SelectedIndex = 0;
+        _transcriptFormatCombo.Items.Add("txt+jsonl+merged");
+
+        var selectedFormat = string.IsNullOrWhiteSpace(_workingCopy.TranscriptFormat)
+            ? "txt+jsonl"
+            : _workingCopy.TranscriptFormat.Trim();
+
+        if (!_transcriptFormatCombo.Items
+                .OfType<string>()
+                .Any(item => string.Equals(item, selectedFormat, StringComparison.OrdinalIgnoreCase)))
+        {
+            selectedFormat = "txt+jsonl";
+        }
+
+        _transcriptFormatCombo.SelectedItem = selectedFormat;
 
         RefreshDevices();
     }

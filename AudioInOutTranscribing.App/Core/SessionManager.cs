@@ -60,6 +60,7 @@ public sealed class SessionManager : IDisposable
         return await recoveryService.RecoverAsync(
             outputRoot: settings.OutputFolder,
             saveRawAudio: settings.SaveRawAudio,
+            writeMergedTranscript: ShouldWriteMergedTranscript(settings),
             transcriptionClient: transcriptionClient,
             cancellationToken: cancellationToken);
     }
@@ -105,7 +106,9 @@ public sealed class SessionManager : IDisposable
             var micChannel = Channel.CreateUnbounded<ChunkJob>(new UnboundedChannelOptions { SingleReader = true, SingleWriter = true });
             var speakerChannel = Channel.CreateUnbounded<ChunkJob>(new UnboundedChannelOptions { SingleReader = true, SingleWriter = true });
 
-            var transcriptWriter = new TranscriptWriter(sessionRoot);
+            var transcriptWriter = new TranscriptWriter(
+                sessionRoot,
+                writeMergedTranscript: ShouldWriteMergedTranscript(settings));
             var transcriptionClient = new MistralTranscriptionClient(_httpClient, settings.MistralApiKey, settings.Model);
             var micWorker = new TranscriptionWorker(
                 AudioSourceKind.Mic,
@@ -248,6 +251,7 @@ public sealed class SessionManager : IDisposable
                 Speaker = session.SpeakerWorker.Summary
             };
 
+            await session.TranscriptWriter.FinalizeSessionOutputsAsync(CancellationToken.None);
             await session.TranscriptWriter.WriteSessionSummaryAsync(summary, CancellationToken.None);
             Log.Information("Recording stopped. session={SessionId} path={SessionRoot}", session.SessionId, session.SessionRoot);
 
@@ -293,6 +297,11 @@ public sealed class SessionManager : IDisposable
         {
             throw new InvalidOperationException("Mistral API key is missing in Settings.");
         }
+    }
+
+    private static bool ShouldWriteMergedTranscript(AppSettings settings)
+    {
+        return string.Equals(settings.TranscriptFormat, "txt+jsonl+merged", StringComparison.OrdinalIgnoreCase);
     }
 
     private static void EnqueueChunk(AudioChunkReadyEventArgs chunk, string sessionId, ChannelWriter<ChunkJob> writer)

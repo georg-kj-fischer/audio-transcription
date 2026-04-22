@@ -26,7 +26,7 @@ $logPath = Join-Path $logDir ("install-{0:yyyyMMdd-HHmmss}.log" -f (Get-Date))
 Write-Host "Installing MSI: $MsiPath"
 Write-Host "Installer log: $logPath"
 
-& msiexec.exe /i "$MsiPath" /qb+ /norestart /l*vx "$logPath"
+& msiexec.exe /i "$MsiPath" /norestart /l*vx "$logPath"
 $exitCode = $LASTEXITCODE
 
 switch ($exitCode) {

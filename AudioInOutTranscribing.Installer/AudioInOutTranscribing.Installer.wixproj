@@ -7,7 +7,8 @@
     <ProductName Condition="'$(ProductName)' == ''">Audio InOut Transcribing</ProductName>
     <UpgradeCode Condition="'$(UpgradeCode)' == ''">8D16A7CA-8E6B-4BB6-8AE4-93F2C24C95D4</UpgradeCode>
     <PublishDir Condition="'$(PublishDir)' == ''">$(MSBuildThisFileDirectory)..\AudioInOutTranscribing.App\bin\Release\net8.0-windows\win-x64\publish\</PublishDir>
-    <DefineConstants>ProductVersion=$(ProductVersion);Manufacturer=$(Manufacturer);ProductName=$(ProductName);UpgradeCode=$(UpgradeCode);PublishDir=$(PublishDir)</DefineConstants>
+    <LicenseRtfPath Condition="'$(LicenseRtfPath)' == ''">$(MSBuildThisFileDirectory)Assets\Apache-2.0.rtf</LicenseRtfPath>
+    <DefineConstants>ProductVersion=$(ProductVersion);Manufacturer=$(Manufacturer);ProductName=$(ProductName);UpgradeCode=$(UpgradeCode);PublishDir=$(PublishDir);LicenseRtfPath=$(LicenseRtfPath)</DefineConstants>
   </PropertyGroup>
 
   <Target Name="ValidatePublishDir" BeforeTargets="Build">

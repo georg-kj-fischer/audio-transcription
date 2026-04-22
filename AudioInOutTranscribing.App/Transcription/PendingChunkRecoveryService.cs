@@ -17,6 +17,7 @@ public sealed class PendingChunkRecoveryService
     public async Task<PendingChunkRecoverySummary> RecoverAsync(
         string outputRoot,
         bool saveRawAudio,
+        bool writeMergedTranscript,
         ITranscriptionClient transcriptionClient,
         CancellationToken cancellationToken = default)
     {
@@ -33,6 +34,7 @@ public sealed class PendingChunkRecoveryService
         foreach (var sessionRoot in sessionDirectories)
         {
             summary.ScannedSessions++;
+            var writer = new TranscriptWriter(sessionRoot, writeMergedTranscript);
 
             foreach (var source in new[] { AudioSourceKind.Mic, AudioSourceKind.Speaker })
             {
@@ -44,7 +46,6 @@ public sealed class PendingChunkRecoveryService
 
                 var indexPath = Path.Combine(sourceFolder, "index.jsonl");
                 var latestByWavPath = LoadLatestIndexByWavPath(indexPath);
-                var writer = new TranscriptWriter(sessionRoot);
 
                 var wavFiles = Directory.EnumerateFiles(sourceFolder, "*.wav", SearchOption.TopDirectoryOnly)
                     .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
@@ -107,6 +108,8 @@ public sealed class PendingChunkRecoveryService
                     }
                 }
             }
+
+            await writer.FinalizeSessionOutputsAsync(cancellationToken);
         }
 
         return summary;

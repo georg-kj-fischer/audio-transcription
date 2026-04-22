@@ -10,6 +10,7 @@
     Scope="perMachine">
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
     <MediaTemplate EmbedCab="yes" />
+    <WixVariable Id="WixUILicenseRtf" Value="$(var.LicenseRtfPath)" />
     <ui:WixUI Id="WixUI_Minimal" />
 
     <StandardDirectory Id="ProgramFiles64Folder">

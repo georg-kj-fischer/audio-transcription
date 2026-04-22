@@ -97,4 +97,30 @@ public sealed class SettingsStoreTests
             Directory.Delete(tempRoot, recursive: true);
         }
     }
+
+    [Fact]
+    public async Task Load_PreservesMergedTranscriptFormat()
+    {
+        var tempRoot = Path.Combine(Path.GetTempPath(), "audio-transcriber-tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempRoot);
+        try
+        {
+            var settingsPath = Path.Combine(tempRoot, "settings.json");
+            var json = """
+                       {
+                         "transcriptFormat": "txt+jsonl+merged"
+                       }
+                       """;
+            await File.WriteAllTextAsync(settingsPath, json);
+
+            var store = new SettingsStore(settingsPath);
+            var loaded = await store.LoadAsync();
+
+            Assert.Equal("txt+jsonl+merged", loaded.TranscriptFormat);
+        }
+        finally
+        {
+            Directory.Delete(tempRoot, recursive: true);
+        }
+    }
 }

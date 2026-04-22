@@ -2,6 +2,10 @@
 
 WinForms tray app for Windows that captures microphone + speaker loopback audio, chunks WAV files, transcribes with Mistral, and writes per-source transcripts.
 
+Transcript output options:
+- `txt+jsonl` writes per-source files under `mic/` and `speaker/` (default).
+- `txt+jsonl+merged` also writes a combined `transcript.txt` in the session root, with non-overlapping speaker IDs across mic + speaker streams.
+
 ## Projects
 
 - `AudioInOutTranscribing.App` - .NET 8 WinForms tray application
@@ -38,7 +42,9 @@ dotnet publish .\AudioInOutTranscribing.App\AudioInOutTranscribing.App.csproj -c
 .\tools\build-msi.ps1
 ```
 
-Optional version override:
+By default, the script auto-increments the MSI `ProductVersion` from the latest built MSI in `AudioInOutTranscribing.Installer\bin\...`.
+
+Optional explicit version override:
 
 ```powershell
 .\tools\build-msi.ps1 -Version 1.0.1
@@ -50,4 +56,8 @@ Optional version override:
 .\tools\install-msi.ps1
 ```
 
-The installer is launched with basic UI (`/qb+`) and writes a verbose log to `artifacts\logs\`.
+The installer is launched with full UI (including the license prompt) and writes a verbose log to `artifacts\logs\`.
+
+## License
+
+This project is licensed under the Apache License 2.0. See `LICENSE`.

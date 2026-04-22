@@ -73,11 +73,24 @@ public sealed class SettingsStore
             settings.OutputFolder = AppPaths.DefaultTranscriptRoot;
         }
 
-        settings.TranscriptFormat = string.IsNullOrWhiteSpace(settings.TranscriptFormat) ? "txt+jsonl" : settings.TranscriptFormat;
+        settings.TranscriptFormat = NormalizeTranscriptFormat(settings.TranscriptFormat);
         settings.ApiProvider = string.IsNullOrWhiteSpace(settings.ApiProvider) ? "mistral" : settings.ApiProvider;
         settings.Model = NormalizeModel(settings.Model);
         settings.MistralApiKey ??= string.Empty;
         settings.AutoStartOnLaunch = false;
+    }
+
+    private static string NormalizeTranscriptFormat(string? configuredTranscriptFormat)
+    {
+        if (string.IsNullOrWhiteSpace(configuredTranscriptFormat))
+        {
+            return "txt+jsonl";
+        }
+
+        var normalized = configuredTranscriptFormat.Trim();
+        return string.Equals(normalized, "txt+jsonl+merged", StringComparison.OrdinalIgnoreCase)
+            ? "txt+jsonl+merged"
+            : "txt+jsonl";
     }
 
     private static string NormalizeModel(string? configuredModel)

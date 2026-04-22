@@ -133,4 +133,87 @@ public sealed class TranscriptWriterTests
             Directory.Delete(tempRoot, recursive: true);
         }
     }
+
+    [Fact]
+    public async Task FinalizeSessionOutputs_WritesMergedTranscriptWithDistinctSpeakerIdsAcrossSources()
+    {
+        var tempRoot = Path.Combine(Path.GetTempPath(), "audio-transcriber-tests", Guid.NewGuid().ToString("N"));
+        var sessionRoot = Path.Combine(tempRoot, "session-131313");
+        Directory.CreateDirectory(Path.Combine(sessionRoot, "mic"));
+        Directory.CreateDirectory(Path.Combine(sessionRoot, "speaker"));
+
+        try
+        {
+            var writer = new TranscriptWriter(sessionRoot, writeMergedTranscript: true);
+            var start = new DateTimeOffset(2026, 4, 21, 10, 0, 0, TimeSpan.Zero);
+
+            var micChunk = new ChunkJob(
+                "session-131313",
+                AudioSourceKind.Mic,
+                1,
+                start,
+                start.AddSeconds(30),
+                Path.Combine(sessionRoot, "mic", "0001.wav"),
+                0);
+
+            var speakerChunk = new ChunkJob(
+                "session-131313",
+                AudioSourceKind.Speaker,
+                1,
+                start.AddSeconds(31),
+                start.AddSeconds(61),
+                Path.Combine(sessionRoot, "speaker", "0001.wav"),
+                0);
+
+            await writer.AppendChunkOutcomeAsync(
+                micChunk,
+                new TranscriptionResult(
+                    micChunk.ChunkIndex,
+                    micChunk.Source,
+                    "hello world",
+                    30000,
+                    "req-mic",
+                    TranscriptionStatus.Success,
+                    null,
+                    new[]
+                    {
+                        new SpeakerSegment(0.0, 2.0, "speaker_1", "speaker_1", "hello"),
+                        new SpeakerSegment(2.0, 4.0, "speaker_2", "speaker_2", "world")
+                    }),
+                attempts: 1,
+                CancellationToken.None);
+
+            await writer.AppendChunkOutcomeAsync(
+                speakerChunk,
+                new TranscriptionResult(
+                    speakerChunk.ChunkIndex,
+                    speakerChunk.Source,
+                    "response",
+                    30000,
+                    "req-speaker",
+                    TranscriptionStatus.Success,
+                    null,
+                    new[]
+                    {
+                        new SpeakerSegment(0.0, 2.0, "speaker_1", "speaker_1", "response")
+                    }),
+                attempts: 1,
+                CancellationToken.None);
+
+            await writer.FinalizeSessionOutputsAsync(CancellationToken.None);
+
+            var mergedTranscriptPath = Path.Combine(sessionRoot, "transcript.txt");
+            var mergedTranscript = await File.ReadAllTextAsync(mergedTranscriptPath);
+
+            Assert.Contains("source=mic", mergedTranscript, StringComparison.Ordinal);
+            Assert.Contains("source=speaker", mergedTranscript, StringComparison.Ordinal);
+            Assert.Contains("[speaker_1] hello", mergedTranscript, StringComparison.Ordinal);
+            Assert.Contains("[speaker_2] world", mergedTranscript, StringComparison.Ordinal);
+            Assert.Contains("[speaker_3] response", mergedTranscript, StringComparison.Ordinal);
+        }
+        finally
+        {
+            Directory.Delete(tempRoot, recursive: true);
+        }
+    }
 }

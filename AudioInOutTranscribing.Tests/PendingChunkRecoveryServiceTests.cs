@@ -31,7 +31,7 @@ public sealed class PendingChunkRecoveryServiceTests
             var fakeClient = new FakeTranscriptionClient(TranscriptionStatus.Success);
             var service = new PendingChunkRecoveryService(maxRetryAttempts: 5);
 
-            var summary = await service.RecoverAsync(root, saveRawAudio: false, fakeClient, CancellationToken.None);
+            var summary = await service.RecoverAsync(root, saveRawAudio: false, writeMergedTranscript: false, fakeClient, CancellationToken.None);
 
             Assert.Equal(1, summary.PendingChunksFound);
             Assert.Equal(1, summary.RetriedChunks);
@@ -79,7 +79,7 @@ public sealed class PendingChunkRecoveryServiceTests
             var fakeClient = new FakeTranscriptionClient(TranscriptionStatus.Success);
             var service = new PendingChunkRecoveryService(maxRetryAttempts: 5);
 
-            var summary = await service.RecoverAsync(root, saveRawAudio: true, fakeClient, CancellationToken.None);
+            var summary = await service.RecoverAsync(root, saveRawAudio: true, writeMergedTranscript: false, fakeClient, CancellationToken.None);
 
             Assert.Equal(1, summary.PendingChunksFound);
             Assert.Equal(0, summary.RetriedChunks);
