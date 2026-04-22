@@ -1,0 +1,54 @@
+<Wix
+  xmlns="http://wixtoolset.org/schemas/v4/wxs"
+  xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+  <Package
+    Id="AudioInOutTranscribing"
+    Name="$(var.ProductName)"
+    Manufacturer="$(var.Manufacturer)"
+    Version="$(var.ProductVersion)"
+    UpgradeCode="$(var.UpgradeCode)"
+    Scope="perMachine">
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+    <ui:WixUI Id="WixUI_Minimal" />
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="AudioInOutTranscribing" />
+    </StandardDirectory>
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="ProgramMenuAppFolder" Name="$(var.ProductName)" />
+    </StandardDirectory>
+
+    <Component Id="MainExecutableComponent" Directory="INSTALLFOLDER">
+      <File Id="MainExecutableFile" Source="$(var.PublishDir)\AudioInOutTranscribing.App.exe" KeyPath="yes" Checksum="yes" />
+    </Component>
+
+    <Component Id="StartMenuShortcutComponent" Directory="ProgramMenuAppFolder">
+      <CreateFolder />
+      <Shortcut
+        Id="StartMenuShortcut"
+        Name="$(var.ProductName)"
+        Description="$(var.ProductName)"
+        Target="[#MainExecutableFile]"
+        WorkingDirectory="INSTALLFOLDER" />
+      <RemoveFolder Id="RemoveProgramMenuAppFolder" Directory="ProgramMenuAppFolder" On="uninstall" />
+      <RegistryValue
+        Root="HKCU"
+        Key="Software\$(var.Manufacturer)\$(var.ProductName)"
+        Name="installed"
+        Type="integer"
+        Value="1"
+        KeyPath="yes" />
+    </Component>
+
+    <Feature Id="MainFeature" Title="$(var.ProductName)" Level="1">
+      <Files Include="$(var.PublishDir)\**" Directory="INSTALLFOLDER">
+        <Exclude Files="$(var.PublishDir)\*.pdb" />
+        <Exclude Files="$(var.PublishDir)\*.xml" />
+        <Exclude Files="$(var.PublishDir)\AudioInOutTranscribing.App.exe" />
+      </Files>
+      <ComponentRef Id="MainExecutableComponent" />
+      <ComponentRef Id="StartMenuShortcutComponent" />
+    </Feature>
+  </Package>
+</Wix>

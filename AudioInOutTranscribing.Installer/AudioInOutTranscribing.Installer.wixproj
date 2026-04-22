@@ -1,0 +1,21 @@
+<Project Sdk="WixToolset.Sdk/6.0.2">
+  <PropertyGroup>
+    <OutputType>Package</OutputType>
+    <InstallerPlatform>x64</InstallerPlatform>
+    <ProductVersion Condition="'$(ProductVersion)' == ''">1.0.0</ProductVersion>
+    <Manufacturer Condition="'$(Manufacturer)' == ''">AudioInOutTranscribing</Manufacturer>
+    <ProductName Condition="'$(ProductName)' == ''">Audio InOut Transcribing</ProductName>
+    <UpgradeCode Condition="'$(UpgradeCode)' == ''">8D16A7CA-8E6B-4BB6-8AE4-93F2C24C95D4</UpgradeCode>
+    <PublishDir Condition="'$(PublishDir)' == ''">$(MSBuildThisFileDirectory)..\AudioInOutTranscribing.App\bin\Release\net8.0-windows\win-x64\publish\</PublishDir>
+    <DefineConstants>ProductVersion=$(ProductVersion);Manufacturer=$(Manufacturer);ProductName=$(ProductName);UpgradeCode=$(UpgradeCode);PublishDir=$(PublishDir)</DefineConstants>
+  </PropertyGroup>
+
+  <Target Name="ValidatePublishDir" BeforeTargets="Build">
+    <Error Condition="'$(PublishDir)' == ''" Text="PublishDir is required. Run dotnet publish first or pass -p:PublishDir=..." />
+    <Error Condition="!Exists('$(PublishDir)')" Text="PublishDir '$(PublishDir)' does not exist. Run dotnet publish first." />
+  </Target>
+
+  <ItemGroup>
+    <PackageReference Include="WixToolset.UI.wixext" Version="6.0.2" />
+  </ItemGroup>
+</Project>
